@@ -19,7 +19,7 @@ class Plant(models.Model):
     last_watered = models.DateTimeField(default='', blank=True, null=True)
 
     def __str__(self):
-        return f'ID:{self.id} ({self.user}, {self.species})'
+        return f'ID:{self.id} (User:{self.user.username}, {self.species})'
 
 
 class Sensor(models.Model):
@@ -35,12 +35,12 @@ class Sensor(models.Model):
     ]
     uuid = models.CharField(primary_key=True, max_length=64)
     status = models.CharField(choices=SENSOR_STATUSES, max_length=2, default='OK')
-    location = models.CharField(default='', max_length=128)
+    location = models.CharField(default='', max_length=128, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    plant = models.ForeignKey(Plant, on_delete=models.CASCADE)
+    plant = models.ForeignKey(Plant, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-        return f'ID:{self.uuid[0:8]}... ({self.location})'
+        return f'ID:{self.uuid[0:8]}... ({self.location}, P:{self.plant_id})'
 
 
 class Reading(models.Model):
@@ -54,6 +54,7 @@ class Reading(models.Model):
     temperature = models.FloatField()
     humidity = models.FloatField()
     timestamp = models.DateTimeField()  # generated on the sensor
+    status = models.IntegerField()
 
     def __str__(self):
-        return f'[{self.timestamp}] (S{self.sensor_id[0:8]}, P{self.sensor.plant_id}) Temp: {self.temperature}, Humi: {self.humidity}'
+        return f'[{self.timestamp}] (S{self.sensor_id}, P{self.plant_id})'
